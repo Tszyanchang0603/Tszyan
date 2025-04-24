@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hong Kong Rooftop Solar Radiation Map</title>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.32/esri/themes/light/main.css" />
+  
+<!-- remove and watch what happens  -->
+<style>
+  html,
+  body,
+  #viewDiv {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+  }
+</style>
+  
+  <!-- reference to external javascript file-->
+  <script src="https://js.arcgis.com/4.32/"></script>
+  <script>
+ 
+	
+    //create a map instance
+    //https://developers.arcgis.com/javascript/latest/api-reference/esri-Map.html
+    require(["esri/Map","esri/layers/TileLayer","esri/layers/FeatureLayer","esri/views/MapView","esri/PopupTemplate", "esri/widgets/Legend"], function(Map, TileLayer, FeatureLayer, MapView, PopupTemplate, Legend) {
+    
+      const SolarRadiation = new TileLayer({
+        url: "https://tiles.arcgis.com/tiles/kJjJ8lxiyn8LOYyS/arcgis/rest/services/Solar_Blue_2_WTL1/MapServer" 
+      });
+
+        const popupTemplate2 = new PopupTemplate({
+        title: "District",
+        content: [{
+        // Specify the type of popup element - fields
+        //fieldInfos autocasts
+        type: "fields",
+        fieldInfos: [{
+            fieldName: "ENAME", 
+            visible: true,
+            label: "Name:"
+          }]
+        }]
+      });
+
+      const HongKongDistrict = new FeatureLayer({
+        url: "https://services7.arcgis.com/kJjJ8lxiyn8LOYyS/arcgis/rest/services/Map_1/FeatureServer/1",
+        outFields:["*"],
+        popupTemplate: popupTemplate2
+      });
+
+        const popupTemplate = new PopupTemplate({
+        title: "Building",
+        content: [{
+        // Specify the type of popup element - fields
+        //fieldInfos autocasts
+        type: "fields",
+        fieldInfos: [{
+            fieldName: "OFFICIALBU",
+            visible: true,
+            label: "Building English Name:"
+          },
+          {
+            fieldName: "OFFICIAL_1",
+            visible: true,
+            label: "Building Chinese Name:",
+          },
+          {
+            fieldName: "SHAPE__Are",
+            visible: true,
+            label: "Area:",
+          },
+          {
+            fieldName: "TOPHEIGHT", 
+            visible: true,
+            label: "Height:"
+          }]
+        }]
+      });
+
+      const HongKongBuilding = new FeatureLayer({
+        url: "https://services7.arcgis.com/kJjJ8lxiyn8LOYyS/arcgis/rest/services/Map_1/FeatureServer",
+        outFields:["*"],
+        popupTemplate: popupTemplate
+      });
+        
+
+      const map = new Map({
+      basemap:"gray-vector"
+      });
+
+      const view = new MapView({
+        container: "viewDiv",
+        map: map,
+        zoom: 10,
+        center: [114.18154553412727, 22.345234430790704] 
+      });
+
+      let legend = new Legend({
+       view: view
+      });
+
+
+      view.when(function() {
+        view.ui.add(legend, "bottom-left") 
+        map.add(SolarRadiation);
+        map.add(HongKongDistrict);
+        map.add(HongKongBuilding);
+      });
+
+    });
+
+  </script>
+
+</head>
+<body>
+    <div id="viewDiv" ></div>
+</body>
+</html>
